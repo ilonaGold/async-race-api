@@ -40,7 +40,7 @@ const PORT = process.env.PORT || 3000;
 
 const state = { velocity: {}, blocked: {} };
 
-// CORS middleware
+// CORS middleware FIRST
 server.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
@@ -62,6 +62,7 @@ const STATUS = {
     DRIVE: 'drive',
 };
 
+// Custom endpoint BEFORE router
 server.patch('/engine', (req, res) => {
     const { id, status } = req.query;
 
@@ -124,6 +125,7 @@ server.patch('/engine', (req, res) => {
     }
 });
 
+// Router comes LAST
 server.use(router);
 server.listen(PORT, () => {
     console.log('Server is running on port', PORT);
