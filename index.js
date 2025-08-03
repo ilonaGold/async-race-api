@@ -40,6 +40,26 @@ const PORT = process.env.PORT || 3000;
 
 const state = { velocity: {}, blocked: {} };
 
+// CORS middleware FIRST
+server.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control"
+  );
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 server.use(middlewares);
 
 // Health check endpoint to prevent cold starts
@@ -149,6 +169,7 @@ server.patch("/engine", (req, res) => {
   }
 });
 
+// Router comes LAST
 server.use(router);
 server.listen(PORT, () => {
   console.log("Server is running on port", PORT);
