@@ -1,0 +1,40 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: "*/14 * * * *"
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keep API and Frontend warm
+        run: |
+          API_URL="${{ secrets.RENDER_URL }}"
+
+          echo "Pinging API at: $API_URL/health"
+          api_response=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/health" || echo "000")
+
+          if [ "$api_response" = "200" ]; then
+            echo "✅ API health check successful"
+          else
+            echo "❌ API health check failed (HTTP $api_response)"
+          fi
+
+          FRONTEND_URL="https://ilonagold.github.io/async-race/"
+          echo "Pinging frontend at: $FRONTEND_URL"
+          frontend_response=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL" || echo "000")
+
+          if [ "$frontend_response" = "200" ]; then
+            echo "✅ Frontend ping successful"
+          else
+            echo "❌ Frontend ping failed (HTTP $frontend_response)"
+          fi
+
+          if [ "$api_response" != "200" ]; then
+            exit 1
+          fi
+
+      - name: Log completion
+        run: echo "Keep-alive completed at $(date)"
